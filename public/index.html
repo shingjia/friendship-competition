@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>羽球雙打分組賽</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>羽球雙打分組賽</h1>
+    <nav>
+      <button data-tab="register" class="tab active">報名</button>
+      <button data-tab="groups" class="tab">分組</button>
+      <button data-tab="matches" class="tab">賽程計分</button>
+      <button data-tab="standings" class="tab">排名</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="tab-register" class="tab-panel active">
+      <h2>報名選手</h2>
+      <div id="register-locked" class="banner hidden">
+        已完成分組，無法修改名單。請先到「分組」頁點【重設賽事】。
+      </div>
+
+      <div class="card">
+        <h3>單筆新增</h3>
+        <form id="form-add-player" class="row">
+          <input id="player-name" placeholder="姓名" required />
+          <input id="player-level" type="number" step="0.1" placeholder="等級 (數字，越大越強)" required />
+          <button type="submit">新增</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>CSV 貼上（每行一人，格式：姓名,等級）</h3>
+        <textarea id="csv-input" rows="6" placeholder="王小明,7&#10;李大華,5&#10;..."></textarea>
+        <div class="row">
+          <button id="btn-bulk-add">匯入</button>
+          <span id="bulk-status" class="muted"></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row between">
+          <h3>名單 (<span id="player-count">0</span>)</h3>
+          <button id="btn-clear-players" class="danger">清空全部</button>
+        </div>
+        <table id="players-table">
+          <thead><tr><th>#</th><th>姓名</th><th>等級</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tab-groups" class="tab-panel">
+      <h2>分組設定</h2>
+      <div class="card">
+        <div class="row">
+          <label>組數：</label>
+          <input id="num-groups" type="number" min="1" value="5" />
+          <button id="btn-generate-groups">執行分組</button>
+          <button id="btn-reset" class="danger">重設賽事</button>
+        </div>
+        <p class="muted">依等級由強至弱排序後切分；每組內隨機配對固定搭檔（奇數會留 1 名候補）。</p>
+        <div id="leftover-banner" class="banner hidden"></div>
+      </div>
+
+      <div id="groups-view"></div>
+    </section>
+
+    <section id="tab-matches" class="tab-panel">
+      <h2>賽程與計分</h2>
+      <p class="muted">填入兩邊分數即視為完賽，留空代表未進行。</p>
+      <div id="matches-view"></div>
+    </section>
+
+    <section id="tab-standings" class="tab-panel">
+      <h2>排名</h2>
+      <p class="muted">排序：勝場 → 得失分差 → 總得分</p>
+      <div id="standings-view"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
