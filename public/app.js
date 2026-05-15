@@ -104,31 +104,65 @@ function renderMatches() {
   for (const g of STATE.groups) {
     const groupMatches = STATE.matches.filter(m => m.groupId === g.groupId);
     if (!groupMatches.length) continue;
+
+    const total = groupMatches.length;
+    const done = groupMatches.filter(m => m.score1 !== null && m.score2 !== null).length;
+    const pct = total ? Math.round(done / total * 100) : 0;
+    const groupNum = g.groupId.replace('g', '');
+
     const card = document.createElement('div');
     card.className = 'group-card';
-    const groupNum = g.groupId.replace('g', '');
-    card.innerHTML = `<h3>分組 ${groupNum} 賽程</h3>`;
-    for (const m of groupMatches) {
-      const row = document.createElement('div');
-      row.className = 'match-row';
-      const done = m.score1 !== null && m.score2 !== null;
-      row.innerHTML = `
-        <div>${escapeHtml(pairLabel(m.pair1Id))} <span class="muted">vs</span> ${escapeHtml(pairLabel(m.pair2Id))}</div>
-        <input type="number" min="0" data-mid="${m.matchId}" data-side="1" value="${m.score1 ?? ''}" placeholder="分數" />
-        <span class="vs">:</span>
-        <input type="number" min="0" data-mid="${m.matchId}" data-side="2" value="${m.score2 ?? ''}" placeholder="分數" />
-        <span class="status">${done ? '已完賽' : '未進行'}</span>`;
-      card.appendChild(row);
-    }
+    card.innerHTML = `
+      <div class="group-header">
+        <h3>分組 ${groupNum}</h3>
+        <span class="progress-label">${done}/${total} 完賽 (${pct}%)</span>
+      </div>
+      <div class="progress"><div class="progress-bar" style="width:${pct}%"></div></div>
+      <div class="match-list"></div>`;
+    const list = card.querySelector('.match-list');
+
+    groupMatches.forEach((m, idx) => {
+      const isDone = m.score1 !== null && m.score2 !== null;
+      const tie = isDone && m.score1 === m.score2;
+      const winner1 = isDone && m.score1 > m.score2;
+      const winner2 = isDone && m.score2 > m.score1;
+      const cardClass = isDone ? (tie ? 'tie' : 'done') : '';
+      const statusClass = isDone ? (tie ? 'badge-tie' : 'badge-done') : 'badge-pending';
+      const statusText = isDone ? (tie ? '平手' : '已完賽') : '未進行';
+
+      const mc = document.createElement('div');
+      mc.className = `match-card ${cardClass}`.trim();
+      mc.innerHTML = `
+        <div class="match-header">
+          <span class="match-num">#${idx + 1}</span>
+          <span class="status-badge ${statusClass}">${statusText}</span>
+        </div>
+        <div class="match-body">
+          <div class="team team-a ${winner1 ? 'winner' : ''}">
+            <span class="team-name">${escapeHtml(pairLabel(m.pair1Id))}</span>
+            ${winner1 ? '<span class="winner-mark">★ 勝</span>' : ''}
+          </div>
+          <div class="score-block">
+            <input type="number" min="0" inputmode="numeric" data-mid="${m.matchId}" data-side="1" value="${m.score1 ?? ''}" placeholder="-" />
+            <span class="score-sep">:</span>
+            <input type="number" min="0" inputmode="numeric" data-mid="${m.matchId}" data-side="2" value="${m.score2 ?? ''}" placeholder="-" />
+          </div>
+          <div class="team team-b ${winner2 ? 'winner' : ''}">
+            <span class="team-name">${escapeHtml(pairLabel(m.pair2Id))}</span>
+            ${winner2 ? '<span class="winner-mark">★ 勝</span>' : ''}
+          </div>
+        </div>`;
+      list.appendChild(mc);
+    });
     view.appendChild(card);
   }
 
   view.querySelectorAll('input[data-mid]').forEach(inp => {
     inp.addEventListener('change', async () => {
       const mid = inp.dataset.mid;
-      const row = inp.parentElement;
-      const s1 = row.querySelector('input[data-side="1"]').value;
-      const s2 = row.querySelector('input[data-side="2"]').value;
+      const scope = inp.closest('.match-card');
+      const s1 = scope.querySelector('input[data-side="1"]').value;
+      const s2 = scope.querySelector('input[data-side="2"]').value;
       try {
         await api('POST', `/api/matches/${mid}/score`, { score1: s1, score2: s2 });
         await refresh();

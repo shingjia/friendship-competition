@@ -179,9 +179,9 @@ function computeStandings(state) {
     for (const r of rows) r.diff = r.pointsFor - r.pointsAgainst;
 
     rows.sort((a, b) => {
-      if (b.wins !== a.wins) return b.wins - a.wins;
-      if (b.diff !== a.diff) return b.diff - a.diff;
-      return b.pointsFor - a.pointsFor;
+      if (b.pointsFor !== a.pointsFor) return b.pointsFor - a.pointsFor;
+      if (a.pointsAgainst !== b.pointsAgainst) return a.pointsAgainst - b.pointsAgainst;
+      return b.diff - a.diff;
     });
     rows.forEach((r, i) => { r.rank = i + 1; });
     standings[group.groupId] = rows;

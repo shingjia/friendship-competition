@@ -3,13 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>羽球雙打分組賽</title>
+  <title>泰豪鋼泰 vs 強心臟羽球隊 友誼賽</title>
+  <link rel="icon" type="image/png" href="strongheart.png" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <h1>羽球雙打分組賽</h1>
-    <nav>
+  <header class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-inner">
+      <img class="hero-logo" src="strongheart.png" alt="Strong Heart logo" />
+      <div class="hero-text">
+        <p class="hero-eyebrow">FRIENDLY MATCH · 友誼賽</p>
+        <h1>泰豪鋼泰 <span class="vs-badge">VS</span> 強心臟羽球隊</h1>
+        <p class="hero-sub">雙打分組循環賽 · 強心臟主辦</p>
+      </div>
+    </div>
+    <nav class="tabs">
       <button data-tab="register" class="tab active">報名</button>
       <button data-tab="groups" class="tab">分組</button>
       <button data-tab="matches" class="tab">賽程計分</button>
@@ -19,7 +28,7 @@
 
   <main>
     <section id="tab-register" class="tab-panel active">
-      <h2>報名選手</h2>
+      <h2><span class="section-bar"></span>報名選手</h2>
       <div id="register-locked" class="banner hidden">
         已完成分組，無法修改名單。請先到「分組」頁點【重設賽事】。
       </div>
@@ -55,7 +64,7 @@
     </section>
 
     <section id="tab-groups" class="tab-panel">
-      <h2>分組設定</h2>
+      <h2><span class="section-bar"></span>分組設定</h2>
       <div class="card">
         <div class="row">
           <label>組數：</label>
@@ -71,17 +80,22 @@
     </section>
 
     <section id="tab-matches" class="tab-panel">
-      <h2>賽程與計分</h2>
+      <h2><span class="section-bar"></span>賽程與計分</h2>
       <p class="muted">填入兩邊分數即視為完賽，留空代表未進行。</p>
       <div id="matches-view"></div>
     </section>
 
     <section id="tab-standings" class="tab-panel">
-      <h2>排名</h2>
-      <p class="muted">排序：勝場 → 得失分差 → 總得分</p>
+      <h2><span class="section-bar"></span>排名</h2>
+      <p class="muted">排序：總得分 → 失分（少為佳）→ 得失分差</p>
       <div id="standings-view"></div>
     </section>
   </main>
+
+  <footer class="page-footer">
+    <img src="strongheart.png" alt="" />
+    <span>Strong Heart Badminton · Friendly Match</span>
+  </footer>
 
   <script src="app.js"></script>
 </body>
