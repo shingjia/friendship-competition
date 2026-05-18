@@ -1,0 +1,2 @@
+- [Project Tech Stack](project-tech-stack.md) — Node/Express + plain JS, flat-file data, no build step
+- [Auth & Settings Design](auth-settings-design.md) — localStorage-only login/settings added 2026-05-18

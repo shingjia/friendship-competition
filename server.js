@@ -7,17 +7,48 @@ const PORT = process.env.PORT || 3000;
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 
 const FILES = {
-  players: path.join(DATA_DIR, 'players.txt'),
-  groups: path.join(DATA_DIR, 'groups.txt'),
-  pairs: path.join(DATA_DIR, 'pairs.txt'),
-  matches: path.join(DATA_DIR, 'matches.txt'),
+  players:  path.join(DATA_DIR, 'players.txt'),
+  groups:   path.join(DATA_DIR, 'groups.txt'),
+  pairs:    path.join(DATA_DIR, 'pairs.txt'),
+  matches:  path.join(DATA_DIR, 'matches.txt'),
+  accounts: path.join(DATA_DIR, 'accounts.txt'),
 };
+
+const ADMIN_USER = 'admin';
 
 function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
   for (const f of Object.values(FILES)) {
     if (!fs.existsSync(f)) fs.writeFileSync(f, '');
   }
+  // 確保 admin 帳號存在（首次啟動或檔案空白時建立 admin/admin）
+  const accs = loadAccountsRaw();
+  if (!accs.find(a => a.username === ADMIN_USER)) {
+    accs.push({ username: ADMIN_USER, password: 'admin' });
+    saveAccountsRaw(accs);
+  }
+}
+
+function loadAccountsRaw() {
+  if (!fs.existsSync(FILES.accounts)) return [];
+  return readLines(FILES.accounts).map(line => {
+    const [username, password] = line.split('|');
+    return { username, password };
+  });
+}
+
+function saveAccountsRaw(accounts) {
+  writeLines(FILES.accounts, accounts.map(a => `${a.username}|${a.password}`));
+}
+
+function getAdminPassword() {
+  const admin = loadAccountsRaw().find(a => a.username === ADMIN_USER);
+  return admin ? admin.password : null;
+}
+
+function verifyAdmin(req) {
+  const pw = (req.body && req.body.adminPassword) || req.headers['x-admin-password'];
+  return pw && pw === getAdminPassword();
 }
 
 function readLines(file) {
@@ -200,11 +231,73 @@ function getState() {
 
 ensureDataDir();
 app.use(express.json({ limit: '1mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+});
+app.use(express.static(path.join(__dirname, 'public'), {
+  etag: false,
+  lastModified: false,
+  maxAge: 0,
+}));
 
 app.get('/api/state', (req, res) => {
   const state = getState();
   res.json({ ...state, standings: computeStandings(state) });
+});
+
+/* ===== 帳號 API ===== */
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body || {};
+  if (!username || !password) return res.status(400).json({ error: '帳號密碼必填' });
+  const user = loadAccountsRaw().find(a => a.username === username && a.password === password);
+  if (!user) return res.status(401).json({ error: '帳號或密碼錯誤' });
+  res.json({ ok: true, username: user.username, isAdmin: user.username === ADMIN_USER });
+});
+
+// 列出帳號（不回傳密碼）
+app.get('/api/accounts', (req, res) => {
+  const accs = loadAccountsRaw().map(a => ({ username: a.username }));
+  res.json(accs);
+});
+
+// 新增 guest 帳號（需 admin 權限）
+app.post('/api/accounts', (req, res) => {
+  if (!verifyAdmin(req)) return res.status(403).json({ error: '需要 admin 權限' });
+  const { username, password } = req.body || {};
+  if (!username || typeof username !== 'string') return res.status(400).json({ error: '帳號必填' });
+  if (!/^[a-zA-Z0-9_\-.]{2,32}$/.test(username)) return res.status(400).json({ error: '帳號需 2-32 字（英數/_-./）' });
+  if (username.toLowerCase() === ADMIN_USER) return res.status(400).json({ error: 'admin 為保留帳號' });
+  if (!password || password.length < 4) return res.status(400).json({ error: '密碼至少需 4 個字元' });
+  const accs = loadAccountsRaw();
+  if (accs.some(a => a.username === username)) return res.status(409).json({ error: '帳號已存在' });
+  accs.push({ username, password });
+  saveAccountsRaw(accs);
+  res.json({ ok: true });
+});
+
+// 刪除帳號（需 admin 權限，不可刪 admin）
+app.delete('/api/accounts/:username', (req, res) => {
+  if (!verifyAdmin(req)) return res.status(403).json({ error: '需要 admin 權限' });
+  const target = req.params.username;
+  if (target === ADMIN_USER) return res.status(400).json({ error: '不可刪除 admin' });
+  const accs = loadAccountsRaw().filter(a => a.username !== target);
+  saveAccountsRaw(accs);
+  res.json({ ok: true });
+});
+
+// 修改 admin 密碼
+app.post('/api/admin/password', (req, res) => {
+  if (!verifyAdmin(req)) return res.status(403).json({ error: '需要 admin 權限' });
+  const { newPassword } = req.body || {};
+  if (!newPassword || newPassword.length < 4) return res.status(400).json({ error: '新密碼至少需 4 個字元' });
+  const accs = loadAccountsRaw();
+  const admin = accs.find(a => a.username === ADMIN_USER);
+  if (admin) admin.password = newPassword;
+  saveAccountsRaw(accs);
+  res.json({ ok: true });
 });
 
 app.post('/api/players', (req, res) => {

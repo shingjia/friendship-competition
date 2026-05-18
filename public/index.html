@@ -8,95 +8,232 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="hero">
-    <div class="hero-bg"></div>
-    <div class="hero-inner">
-      <img class="hero-logo" src="strongheart.png" alt="Strong Heart logo" />
-      <div class="hero-text">
-        <p class="hero-eyebrow">FRIENDLY MATCH · 友誼賽</p>
-        <h1>泰豪鋼泰 <span class="vs-badge">VS</span> 強心臟羽球隊</h1>
-        <p class="hero-sub">雙打分組循環賽 · 強心臟主辦</p>
+
+  <!-- ===== 登入覆蓋層 ===== -->
+  <div id="login-overlay" class="login-overlay hidden">
+    <div class="login-box">
+      <div class="login-logo-wrap">
+        <img id="login-logo" src="olddriver.png" alt="logo" />
+      </div>
+      <h2 id="login-title">羽球友誼賽管理系統</h2>
+      <p class="login-sub">請登入以繼續</p>
+      <form id="form-login">
+        <div class="login-field">
+          <label>帳號</label>
+          <input id="login-username" type="text" placeholder="admin" autocomplete="username" required />
+        </div>
+        <div class="login-field">
+          <label>密碼</label>
+          <input id="login-password" type="password" placeholder="••••••" autocomplete="current-password" required />
+        </div>
+        <div id="login-error" class="login-error hidden">帳號或密碼錯誤</div>
+        <button type="submit" class="login-btn">登入</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== 設定面板 ===== -->
+  <div id="settings-overlay" class="settings-overlay hidden">
+    <div class="settings-panel">
+      <div class="settings-header">
+        <h3>設定</h3>
+        <button id="btn-settings-close" class="icon-btn" title="關閉">&#10005;</button>
+      </div>
+      <div class="settings-body">
+
+        <div class="settings-section">
+          <h4>帳號設定</h4>
+          <div class="settings-field">
+            <label>暱稱</label>
+            <input id="set-nickname" type="text" placeholder="管理員" />
+          </div>
+          <div class="settings-field">
+            <label>新密碼</label>
+            <input id="set-password" type="password" placeholder="留空表示不修改" autocomplete="new-password" />
+          </div>
+          <div class="settings-field">
+            <label>確認新密碼</label>
+            <input id="set-password2" type="password" placeholder="再次輸入新密碼" autocomplete="new-password" />
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h4>帳號管理</h4>
+          <p class="muted small-note">新建帳號為一般使用者（guest），登入後沒有設定功能。</p>
+          <div id="account-list" class="account-list"></div>
+          <div class="settings-field">
+            <label>新增帳號</label>
+            <div class="account-create-row">
+              <input id="new-account-user" type="text" placeholder="帳號" autocomplete="off" />
+              <input id="new-account-pass" type="password" placeholder="密碼" autocomplete="new-password" />
+              <button id="btn-add-account" class="btn-secondary">新增</button>
+            </div>
+            <div id="account-msg" class="settings-msg hidden"></div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h4>頁面外觀</h4>
+          <div class="settings-field">
+            <label>頂部 Logo 圖示</label>
+            <div class="upload-row">
+              <img id="set-icon-preview" src="olddriver.png" alt="logo preview" class="icon-preview" />
+              <label class="upload-btn-label">
+                選擇圖片
+                <input id="set-icon-upload" type="file" accept="image/*" class="hidden" />
+              </label>
+              <button id="btn-reset-icon" class="btn-secondary">還原預設</button>
+            </div>
+          </div>
+          <div class="settings-field">
+            <label>登入頁 Logo 圖示</label>
+            <div class="upload-row">
+              <img id="set-login-icon-preview" src="olddriver.png" alt="login logo preview" class="icon-preview" />
+              <label class="upload-btn-label">
+                選擇圖片
+                <input id="set-login-icon-upload" type="file" accept="image/*" class="hidden" />
+              </label>
+              <button id="btn-reset-login-icon" class="btn-secondary">還原預設</button>
+            </div>
+          </div>
+          <div class="settings-field">
+            <label>友誼賽隊伍名稱</label>
+            <input id="set-team-title" type="text" placeholder="泰豪鋼泰 VS 強心臟羽球隊" />
+          </div>
+          <div class="settings-field">
+            <label>頂部說明文字</label>
+            <input id="set-hero-sub" type="text" placeholder="雙打分組循環賽 · 強心臟主辦" />
+          </div>
+          <div class="settings-field">
+            <label>頂部橫幅背景色</label>
+            <div class="color-row">
+              <input id="set-hero-color" type="color" value="#c8102e" class="color-picker" />
+              <span id="set-hero-color-val" class="color-val">#c8102e</span>
+              <button id="btn-reset-color" class="btn-secondary">還原預設</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="settings-footer">
+        <div id="settings-msg" class="settings-msg hidden"></div>
+        <button id="btn-settings-save">儲存設定</button>
+        <button id="btn-logout" class="btn-secondary">登出</button>
       </div>
     </div>
-    <nav class="tabs">
-      <button data-tab="register" class="tab active">報名</button>
-      <button data-tab="groups" class="tab">分組</button>
-      <button data-tab="matches" class="tab">賽程計分</button>
-      <button data-tab="standings" class="tab">排名</button>
-    </nav>
-  </header>
+  </div>
 
-  <main>
-    <section id="tab-register" class="tab-panel active">
-      <h2><span class="section-bar"></span>報名選手</h2>
-      <div id="register-locked" class="banner hidden">
-        已完成分組，無法修改名單。請先到「分組」頁點【重設賽事】。
-      </div>
-
-      <div class="card">
-        <h3>單筆新增</h3>
-        <form id="form-add-player" class="row">
-          <input id="player-name" placeholder="姓名" required />
-          <input id="player-level" type="number" step="0.1" placeholder="等級 (數字，越大越強)" required />
-          <button type="submit">新增</button>
-        </form>
-      </div>
-
-      <div class="card">
-        <h3>CSV 貼上（每行一人，格式：姓名,等級）</h3>
-        <textarea id="csv-input" rows="6" placeholder="王小明,7&#10;李大華,5&#10;..."></textarea>
-        <div class="row">
-          <button id="btn-bulk-add">匯入</button>
-          <span id="bulk-status" class="muted"></span>
+  <!-- ===== 主體應用 ===== -->
+  <div id="app" class="hidden">
+    <header class="hero">
+      <div class="hero-bg" id="hero-bg"></div>
+      <div class="hero-inner">
+        <img class="hero-logo" id="hero-logo" src="strongheart.png" alt="Strong Heart logo" />
+        <div class="hero-text">
+          <p class="hero-eyebrow">FRIENDLY MATCH · 友誼賽</p>
+          <h1 id="hero-title">泰豪鋼泰 <span class="vs-badge">VS</span> 強心臟羽球隊</h1>
+          <p class="hero-sub" id="hero-sub">雙打分組循環賽 · 強心臟主辦</p>
+        </div>
+        <!-- 右上角使用者資訊 -->
+        <div class="user-widget">
+          <span class="user-name" id="user-display-name">管理員</span>
+          <div class="user-avatar" id="user-avatar">A</div>
+          <button class="icon-btn gear-btn" id="btn-open-settings" title="設定">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </button>
+          <button class="icon-btn logout-btn" id="btn-header-logout" title="登出">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+          </button>
         </div>
       </div>
+      <nav class="tabs">
+        <button data-tab="register" class="tab active">報名</button>
+        <button data-tab="groups" class="tab">分組</button>
+        <button data-tab="matches" class="tab">賽程計分</button>
+        <button data-tab="standings" class="tab">排名</button>
+      </nav>
+    </header>
 
-      <div class="card">
-        <div class="row between">
-          <h3>名單 (<span id="player-count">0</span>)</h3>
-          <button id="btn-clear-players" class="danger">清空全部</button>
+    <main>
+      <section id="tab-register" class="tab-panel active">
+        <h2><span class="section-bar"></span>報名選手</h2>
+        <div id="register-locked" class="banner hidden">
+          已完成分組，無法修改名單。請先到「分組」頁點【重設賽事】。
         </div>
-        <table id="players-table">
-          <thead><tr><th>#</th><th>姓名</th><th>等級</th><th></th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
 
-    <section id="tab-groups" class="tab-panel">
-      <h2><span class="section-bar"></span>分組設定</h2>
-      <div class="card">
-        <div class="row">
-          <label>組數：</label>
-          <input id="num-groups" type="number" min="1" value="5" />
-          <button id="btn-generate-groups">執行分組</button>
-          <button id="btn-reset" class="danger">重設賽事</button>
+        <div class="card">
+          <h3>單筆新增</h3>
+          <form id="form-add-player" class="row">
+            <input id="player-name" placeholder="姓名" required />
+            <input id="player-level" type="number" step="0.1" placeholder="等級 (數字，越大越強)" required />
+            <button type="submit">新增</button>
+          </form>
         </div>
-        <p class="muted">依等級由強至弱排序後切分；每組內隨機配對固定搭檔（奇數會留 1 名候補）。</p>
-        <div id="leftover-banner" class="banner hidden"></div>
-      </div>
 
-      <div id="groups-view"></div>
-    </section>
+        <div class="card">
+          <h3>CSV 貼上（每行一人，格式：姓名,等級）</h3>
+          <textarea id="csv-input" rows="6" placeholder="王小明,7&#10;李大華,5&#10;..."></textarea>
+          <div class="row">
+            <button id="btn-bulk-add">匯入</button>
+            <span id="bulk-status" class="muted"></span>
+          </div>
+        </div>
 
-    <section id="tab-matches" class="tab-panel">
-      <h2><span class="section-bar"></span>賽程與計分</h2>
-      <p class="muted">填入兩邊分數即視為完賽，留空代表未進行。</p>
-      <div id="matches-view"></div>
-    </section>
+        <div class="card">
+          <div class="row between">
+            <h3>名單 (<span id="player-count">0</span>)</h3>
+            <button id="btn-clear-players" class="danger">清空全部</button>
+          </div>
+          <table id="players-table">
+            <thead><tr><th>#</th><th>姓名</th><th>等級</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
 
-    <section id="tab-standings" class="tab-panel">
-      <h2><span class="section-bar"></span>排名</h2>
-      <p class="muted">排序：總得分 → 失分（少為佳）→ 得失分差</p>
-      <div id="standings-view"></div>
-    </section>
-  </main>
+      <section id="tab-groups" class="tab-panel">
+        <h2><span class="section-bar"></span>分組設定</h2>
+        <div class="card">
+          <div class="row">
+            <label>組數：</label>
+            <input id="num-groups" type="number" min="1" value="5" />
+            <button id="btn-generate-groups">執行分組</button>
+            <button id="btn-reset" class="danger">重設賽事</button>
+          </div>
+          <p class="muted">依等級由強至弱排序後切分；每組內隨機配對固定搭檔（奇數會留 1 名候補）。</p>
+          <div id="leftover-banner" class="banner hidden"></div>
+        </div>
 
-  <footer class="page-footer">
-    <img src="strongheart.png" alt="" />
-    <span>Strong Heart Badminton · Friendly Match</span>
-  </footer>
+        <div id="groups-view"></div>
+      </section>
+
+      <section id="tab-matches" class="tab-panel">
+        <h2><span class="section-bar"></span>賽程與計分</h2>
+        <p class="muted">填入兩邊分數即視為完賽，留空代表未進行。</p>
+        <div id="matches-view"></div>
+      </section>
+
+      <section id="tab-standings" class="tab-panel">
+        <h2><span class="section-bar"></span>排名</h2>
+        <p class="muted">排序：總得分 → 失分（少為佳）→ 得失分差</p>
+        <div id="standings-view"></div>
+      </section>
+    </main>
+
+    <footer class="page-footer">
+      <img src="olddriver.png" alt="" />
+      <span>&copy; 老司機專案羽球系統</span>
+    </footer>
+  </div>
 
   <script src="app.js"></script>
 </body>
 </html>
+
